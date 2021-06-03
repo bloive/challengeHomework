@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.example.myapplication.databinding.FragmentRecyclerBinding
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -45,11 +46,21 @@ class RecyclerFragment : Fragment() {
     }
 
     private fun observes() {
-        viewModel._loadingLiveData.observe(viewLifecycleOwner, {
-            binding.refresh.isRefreshing = it
-        })
         viewModel._newsLiveData.observe(viewLifecycleOwner, {
-            adapter.setData(it.toMutableList())
+            when(it.status){
+                Response.Status.SUCCESS -> {
+                    adapter.setData(it.data!!.toMutableList())
+                }
+                Response.Status.ERROR -> {
+                    Toast.makeText(requireActivity(),
+                        it.code.toString(),
+                        Toast.LENGTH_SHORT).show()
+                }
+                Response.Status.LOADING -> {
+                    binding.refresh.isRefreshing = !binding.refresh.isRefreshing
+                }
+            }
+
         })
     }
 }

@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,17 +9,12 @@ import kotlinx.coroutines.launch
 
 class NewsViewModel : ViewModel() {
 
-    private val newsLiveData = MutableLiveData<List<NewsModel>>().apply {
-        mutableListOf<NewsModel>()
-    }
+    private val newsLiveData = MutableLiveData<Response<List<NewsModel>>>()
+        .apply {
+            mutableListOf<NewsModel>()
+        }
 
-    private val loadingLiveData = MutableLiveData<Boolean>().apply {
-        true
-    }
-
-    val _loadingLiveData: LiveData<Boolean> = loadingLiveData
-
-    val _newsLiveData: LiveData<List<NewsModel>> = newsLiveData
+    val _newsLiveData: LiveData<Response<List<NewsModel>>> = newsLiveData
 
     fun init() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -29,16 +23,14 @@ class NewsViewModel : ViewModel() {
     }
 
     private suspend fun getCountries() {
-        val response = RetrofitService.retrofitService().getNews(1)
+        val currentLoadingPageKey = 0
+        val response = RetrofitService.retrofitService(currentLoadingPageKey).getNews()
         if (response.isSuccessful) {
             val items = response.body()
-            items?.forEach{
-                Log.d("JJJJJJJJJJ", "${it.id}")
-            }
-            newsLiveData.postValue(items)
+            newsLiveData.postValue(Response.success(items!!))
         } else {
-            response.code()
+            newsLiveData.postValue(Response.error(response.code()))
         }
-        loadingLiveData.postValue(false)
+        newsLiveData.postValue(Response.loading())
     }
 }

@@ -7,5 +7,5 @@ import retrofit2.http.Query
 
 interface RetrofitRepository {
     @GET("/api/m/v2")
-    suspend fun getNews( @Query("page") query: Int) : Response<List<NewsModel>>
+    suspend fun getNews(@Query("page") pageNumber: Int) : Response<List<NewsModel>>
 }
